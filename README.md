@@ -26,13 +26,17 @@ matching strategy and exception categorisation from the design document.
 
 | Status            | Meaning                                                        | Action            |
 |-------------------|----------------------------------------------------------------|-------------------|
-| `MATCHED`         | Agrees across systems within tolerance                         | None              |
+| `MATCHED`         | Agrees across systems within tolerance (shared key)            | None              |
+| `MATCHED_FUZZY`   | No shared key; matched on composite key (amount+account+date)  | None              |
 | `TIMING`          | Same transaction; posting lags swipe within the grace window   | Recheck next run  |
 | `BREAK_AMOUNT`    | Identity matches but amounts differ beyond materiality         | Investigate       |
 | `BREAK_UNMATCHED` | No counterpart in the other system                             | Investigate       |
+| `AMBIGUOUS`       | Multiple equally-valid composite matches — cannot auto-resolve | Human review      |
 
 Distinguishing a **timing difference** (money in transit, resolves itself) from a
-**real break** (genuine discrepancy) is the central job of the engine.
+**real break** (genuine discrepancy) is the central job of the engine. Where no
+shared key exists, the engine falls back to composite matching; where that is
+ambiguous it routes to a human rather than guessing.
 
 ## The sample data tells a story
 
@@ -40,11 +44,16 @@ The synthetic dataset (`data/`) is built so each outcome appears exactly once:
 
 | Card        | GL        | What it shows                                            |
 |-------------|-----------|---------------------------------------------------------|
-| CRD-88812   | GL-5567   | Clean match (1,000 AED, same day)                       |
+| CRD-88812   | GL-5567   | Tier 1 clean match (1,000 AED, same day)                |
 | CRD-88813   | GL-5568   | Timing difference (card 22nd, GL posts 23rd)            |
 | CRD-88814   | GL-5569   | Amount break (card 750, GL 745 — 5 AED off)             |
 | CRD-88815/16| —         | In card network, missing from GL                        |
+| CRD-88820   | GL-5580   | Tier 2 fuzzy match — no auth code, matched on composite key |
+| CRD-88821/22| —         | Two identical 640 AED txns — ambiguous, routed to human |
 | —           | GL-5571   | In GL, no card counterpart (possible duplicate/error)   |
+
+This exercises all three tiers: shared-key (Tier 1), composite/fuzzy (Tier 2),
+and the human exception queue (Tier 3).
 
 ## Run it
 
