@@ -44,6 +44,18 @@ def test_gl_without_card():
     assert r.status == "BREAK_UNMATCHED"
 
 
+def test_fuzzy_match_no_shared_key():
+    # CRD-88820 has no auth code; matches GL-5580 on amount+account+date
+    r = _results()[("CRD-88820", "GL-5580")]
+    assert r.status == "MATCHED_FUZZY"
+
+
+def test_ambiguous_routes_to_human():
+    # Two identical 640 transactions same day cannot be auto-resolved
+    r = _results()[("CRD-88821", None)]
+    assert r.status == "AMBIGUOUS"
+
+
 def test_contract_rejects_bad_currency():
     bad = {"source_id": "X1", "amount": "100.00", "currency": "XYZ",
            "txn_timestamp": "2026-06-22T10:00:00", "account_code": "card_settlement"}
