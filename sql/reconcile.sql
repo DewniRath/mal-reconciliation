@@ -12,6 +12,12 @@
 -- Tunable thresholds (TDD Section 5): materiality 0.01 AED / 0.1%, timing 1 day.
 -- ============================================================================
 
+-- Tier 1 here is the shared-key (auth_code) match. The Python reference
+-- (src/reconcile.py) additionally implements Tier 2 (composite/fuzzy match on
+-- amount + account + date-window for rows lacking a shared key) and Tier 3
+-- (ambiguous clusters routed to human review). In SQL the Tier-2 fallback is a
+-- second LEFT JOIN on (amount within tolerance, account_code, date window),
+-- applied only to rows unmatched by Tier 1.
 WITH joined AS (
     -- Tier 1: shared-key (exact) match on the card authorisation code.
     -- A real implementation adds a Tier-2 composite/fuzzy LEFT JOIN fallback
