@@ -1,0 +1,6 @@
+source_id	auth_code	amount	currency	txn_timestamp	account_code
+CRD-88812	A1001	1000	AED	2026-06-22T14:03:07	card_settlement
+CRD-88813	A1002	2500	AED	2026-06-22T16:45:22	card_settlement
+CRD-88814	A1003	750	AED	2026-06-22T18:20:11	card_settlement
+CRD-88815	A1004	5000	AED	2026-06-22T21:10:55	card_settlement
+CRD-88816	A1005	320.5	AED	2026-06-22T22:55:03	card_settlement
